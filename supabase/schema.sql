@@ -17,7 +17,7 @@ create table if not exists owner_config (
 
 -- 🔴 REQUIRED: replace 'you@example.com' with the EXACT email you set as
 -- OWNER_EMAIL in .env.local (case-insensitive, but must be the same address).
-insert into owner_config (id, owner_email) values (1, 'you@example.com')
+insert into owner_config (id, owner_email) values (1, 'yousseffathytalat@gmail.com')
 on conflict (id) do update set owner_email = excluded.owner_email;
 
 alter table owner_config enable row level security;
