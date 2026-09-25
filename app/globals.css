@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=Tajawal:wght@400;500;700&display=swap");
+
+:root {
+  --bg: 7 8 13;
+  --surface: 18 22 44;
+  --surface2: 23 28 56;
+  --text: 242 243 248;
+  --muted: 139 144 172;
+  --border: 255 255 255;
+}
+
+.light {
+  --bg: 247 248 252;
+  --surface: 255 255 255;
+  --surface2: 242 243 250;
+  --text: 18 20 43;
+  --muted: 92 96 130;
+  --border: 20 22 50;
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--text));
+  transition: background 0.3s, color 0.3s;
+}
+
+[dir="rtl"] {
+  font-family: "Tajawal", "Inter", sans-serif;
+}
+[dir="ltr"] {
+  font-family: "Inter", "Tajawal", sans-serif;
+}
+
+.border-theme {
+  border-color: rgb(var(--border) / 0.09);
+}
+
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(40px, 30px); }
+}
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-30px, -25px); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a, button, .group { transition: transform .25s ease, opacity .25s ease, background-color .25s ease, border-color .25s ease; }
+}
