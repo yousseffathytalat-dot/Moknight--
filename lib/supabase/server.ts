@@ -1,37 +1,47 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-
-export function createClient() {
-  const cookieStore = cookies();
-
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
+ import { createServerClient, type CookieOptions } from "@supabase/ssr";
+   import { NextResponse, type NextRequest } from "next/server";
+   
+   export async function middleware(request: NextRequest) {
+     let response = NextResponse.next({ request: { headers: request.headers } });
+   
+     const supabase = createServerClient(
+       process.env.NEXT_PUBLIC_SUPABASE_URL!,
+       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(
+            cookiesToSet: { name: string; value: string; options: CookieOptions }[]
+          ) {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+            response = NextResponse.next({ request: { headers: request.headers } });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
         },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          } catch {
-            // called from a Server Component; middleware refreshes the session instead
-          }
-        },
-      },
+      }
+    );
+  
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+  
+    const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
+    const isOwner =
+      !!user?.email &&
+      user.email.toLowerCase() === process.env.OWNER_EMAIL?.toLowerCase();
+  
+    if (isDashboard && !isOwner) {
+      const loginUrl = new URL("/login", request.url);
+      return NextResponse.redirect(loginUrl);
     }
-  );
-}
-
-/** True only for the single owner account, checked by email. */
-export async function isOwnerSession(): Promise<boolean> {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user || !user.email) return false;
-  return user.email.toLowerCase() === process.env.OWNER_EMAIL?.toLowerCase();
-}
+  
+    return response;
+  }
+  
+  export const config = {
+    matcher: ["/dashboard/:path*"],
+  };
